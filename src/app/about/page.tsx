@@ -143,6 +143,7 @@ export default function AboutPage() {
               </h3>
               <span className="font-mono text-[11px] text-muted">
                 {edu.start}{edu.end ? `–${edu.end}` : ""}
+                {"note" in edu && edu.note ? ` · ${edu.note}` : ""}
               </span>
             </div>
           ))}

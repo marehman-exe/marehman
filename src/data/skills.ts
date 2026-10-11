@@ -178,6 +178,7 @@ export const education = [
     org: "University of Education, Lahore (Faisalabad Campus)",
     start: "2022",
     end: "2026",
+    note: "Graduated",
   },
   {
     id: "intermediate",

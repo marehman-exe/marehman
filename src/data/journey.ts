@@ -146,7 +146,7 @@ export const journey: JourneyNode[] = [
     title: "Bachelor of Computer Science",
     org: "University of Education, Lahore (Faisalabad Campus)",
     location: "Faisalabad, Pakistan",
-    summary: "Four-year Computer Science degree. Focus on algorithms, data structures, databases, and applied machine learning. Currently in final year.",
+    summary: "Four-year Computer Science degree. Focus on algorithms, data structures, databases, and applied machine learning.",
     roles: ["ai", "backend", "projects"],
   },
   {
