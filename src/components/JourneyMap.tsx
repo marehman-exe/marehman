@@ -54,8 +54,8 @@ function JourneyNodeCard({ node, index, dim }: { node: JourneyNode; index: numbe
 
   return (
     <li
-      className={`pnode-card pnode relative pl-11 transition-opacity duration-300 ${dim ? "opacity-40" : "opacity-100"}`}
-      style={{ "--i": index } as React.CSSProperties}
+      className="pnode-card pnode relative pl-11 transition-opacity duration-300"
+      style={{ "--i": index, opacity: dim ? 0.35 : undefined } as React.CSSProperties}
     >
       {/* Node dot */}
       <span
