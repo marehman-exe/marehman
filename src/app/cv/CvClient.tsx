@@ -18,7 +18,7 @@ function dateRange(start: string, end?: string) {
 }
 
 const ROLE_LABELS: Record<RoleKey, string> = {
-  ai: "AI Engineer / RAG Systems",
+  ai: "AI Engineer (Part-time, Remote)",
   backend: "Python Backend Developer",
   projects: "Project Portfolio",
 };

@@ -122,7 +122,7 @@ export const experience = [
   {
     id: "ai-engineer",
     kind: "role" as const,
-    title: "Artificial Intelligence Engineer",
+    title: "Artificial Intelligence Engineer (Part-time, Remote)",
     org: undefined as string | undefined,
     start: "2026-01",
     summary:

@@ -60,7 +60,7 @@ export const journey: JourneyNode[] = [
     start: "2026-01",
     title: "Artificial Intelligence Engineer",
     location: "Faisalabad, Pakistan",
-    summary: "Working as an AI Engineer — building predictive ML models, automated data pipelines, end-to-end AI applications, and hardware-software integrations using Python and SQL.",
+    summary: "Working part-time as an AI Engineer (remote) — building predictive ML models, automated data pipelines, end-to-end AI applications, and hardware-software integrations using Python and SQL.",
     stack: ["Python", "SQL", "Scikit-learn", "Pandas", "NumPy", "Raspberry Pi"],
     detail: [
       "Analyze complex datasets and build predictive ML models to drive actionable business insights.",
