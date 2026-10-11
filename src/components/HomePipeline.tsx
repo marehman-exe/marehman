@@ -9,7 +9,7 @@ interface Props {
   nodes: JourneyNode[];
 }
 
-const HORIZON_YEAR = 2035;
+const HORIZON_YEAR = 2030;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -100,8 +100,8 @@ export function HomePipeline({ nodes }: Props) {
 
   const years = buildTimelinePoints(nodes);
   const W = 1000;
-  const H = 148;
-  const Y = 58;
+  const H = 160;
+  const Y = 68;
   const margin = 28;
   const nowX = W - 14; // x position of the "now" dot
   const stepW = (nowX - margin - 20) / (years.length - 1);
@@ -226,6 +226,9 @@ export function HomePipeline({ nodes }: Props) {
           const x = xOfYear(yr);
           const isLive = meta.tone === "live";
           const isFlagship = meta.tone === "flagship";
+          const isEdu = node.kind === "education";
+          const isProject = node.kind === "project";
+          const nodeLabel = isEdu ? "Completed" : isProject ? "Deployed" : null;
           return (
             <g
               key={`node-${yr}`}
@@ -241,6 +244,17 @@ export function HomePipeline({ nodes }: Props) {
                 cx={x} cy={Y} r={meta.r}
                 fill={isFlagship ? "var(--color-signal)" : isLive ? "var(--color-live)" : "var(--color-ink)"}
               />
+              {nodeLabel && (
+                <text
+                  x={x}
+                  y={Y - meta.r - 6}
+                  textAnchor="middle"
+                  className="fill-muted font-mono"
+                  style={{ fontSize: 8, opacity: 0.65 }}
+                >
+                  {nodeLabel}
+                </text>
+              )}
             </g>
           );
         })}
@@ -305,7 +319,7 @@ export function HomePipeline({ nodes }: Props) {
           )}
         </g>
 
-        {/* ── 2035 horizon label ───────────────────────────── */}
+        {/* ── 2030 horizon label ───────────────────────────── */}
         <text
           x={nowX + 14}
           y={Y + 22}
@@ -314,6 +328,17 @@ export function HomePipeline({ nodes }: Props) {
           style={{ fontSize: 10, opacity: 0.25 }}
         >
           {HORIZON_YEAR}
+        </text>
+
+        {/* ── "ongoing" end label ──────────────────────────── */}
+        <text
+          x={nowX + 14}
+          y={Y + 35}
+          textAnchor="middle"
+          className="fill-muted font-mono"
+          style={{ fontSize: 9, opacity: 0.4, fontStyle: "italic" }}
+        >
+          ongoing
         </text>
       </svg>
 
