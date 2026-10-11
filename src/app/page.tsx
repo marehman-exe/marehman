@@ -5,6 +5,7 @@ import { ViewFilter } from "@/components/ViewFilter";
 import { HomePipeline } from "@/components/HomePipeline";
 import { FlagshipProjects } from "@/components/FlagshipProjects";
 import { HeroSummary } from "@/components/HeroSummary";
+import { RotatingTagline } from "@/components/RotatingTagline";
 import { journey } from "@/data/journey";
 import { secondaryProjects } from "@/data/projects";
 import Link from "next/link";
@@ -59,13 +60,8 @@ export default function HomePage() {
           <span>01 · profile</span>
         </div>
 
-        {/* Headline */}
-        <h1
-          id="hero-heading"
-          className="mt-5 max-w-4xl font-display text-4xl font-bold leading-[1.06] tracking-tight text-ink sm:text-5xl"
-        >
-          {profile.tagline}
-        </h1>
+        {/* Rotating headline */}
+        <RotatingTagline />
 
         {/* Sub-headline — updates with role selection */}
         <HeroSummary />

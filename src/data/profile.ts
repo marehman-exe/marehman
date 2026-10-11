@@ -20,6 +20,16 @@ export const profile = {
     projects: "ML models, RAG systems, and AI agents — built as real projects, not tutorials. Each one is on GitHub.",
   },
   tagline: "I build AI applications that turn data into useful answers.",
+  taglines: [
+    "I build AI applications that turn data into useful answers.",
+    "Final-year CS student. Working full-time as an AI Engineer.",
+    "RAG systems, LLM agents, and ML models — built and on GitHub.",
+    "From e-commerce analytics to AI engineering.",
+    "LexBase: multi-tenant RAG for law firms. In progress.",
+    "SightShield: assistive navigation belt on Raspberry Pi. Final year project.",
+    "LangChain Academy — agents, MCP, and human-in-the-loop patterns.",
+    "Hybrid search: vector + BM25 + RRF. Local embeddings. No OpenAI cost.",
+  ],
   bio: [
     "I'm a final-year Computer Science student working full-time as an AI Engineer in Faisalabad. My work involves building predictive ML models, data pipelines, and AI applications using Python.",
     "Most of my recent projects are in RAG and LLM applications. LexBase is the main one — a multi-tenant RAG system for law firms with hybrid search and local embeddings. SightShield is my final year project: an assistive navigation belt for visually impaired users running on Raspberry Pi.",
