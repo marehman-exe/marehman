@@ -18,21 +18,14 @@ function getNowLabel() {
   return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// Build fixed timeline: first node year → HORIZON_YEAR, ~7 visible points
 function buildTimelinePoints(nodes: JourneyNode[]) {
-  const nodeYears = Array.from(
-    new Set(nodes.map((n) => parseInt(n.start)))
-  ).sort((a, b) => a - b);
-
-  const first = nodeYears[0];
-  // Fixed intermediate years evenly spread between first and horizon
-  const count = 6; // intermediate points
+  const first = Math.min(...nodes.map((n) => parseInt(n.start)));
+  const count = 6;
   const span = HORIZON_YEAR - first;
   const intermediates: number[] = [];
   for (let i = 1; i <= count; i++) {
     intermediates.push(Math.round(first + (span * i) / (count + 1)));
   }
-
   return [first, ...intermediates, HORIZON_YEAR];
 }
 
@@ -42,14 +35,12 @@ function getNodeMeta(node: JourneyNode): { tone: "flagship" | "live" | "default"
   return { tone: "default", r: node.weight === 2 ? 5 : 3.5 };
 }
 
-// Find the most recently started active (no end) project node with a slug
 function getMostRecentLiveProject(nodes: JourneyNode[]) {
   return nodes
     .filter((n) => !n.end && n.links?.some((l) => l.url.includes("/projects/")))
     .sort((a, b) => b.start.localeCompare(a.start))[0] ?? null;
 }
 
-// Get slug from project links or fall back to lexbase
 function getLiveProjectSlug(nodes: JourneyNode[]): string {
   const node = getMostRecentLiveProject(nodes);
   if (node?.links) {
@@ -59,7 +50,6 @@ function getLiveProjectSlug(nodes: JourneyNode[]): string {
       if (parts[1]) return parts[1];
     }
   }
-  // fallback — hardcoded most recent flagship
   return "lexbase-legal-rag";
 }
 
@@ -99,26 +89,28 @@ export function HomePipeline({ nodes }: Props) {
   }, []);
 
   const years = buildTimelinePoints(nodes);
-  const W = 1000;
-  const H = 160;
-  const Y = 68;
-  const margin = 28;
-  const nowX = W - 14; // x position of the "now" dot
-  const stepW = (nowX - margin - 20) / (years.length - 1);
 
-  function xOf(idx: number) {
-    return margin + idx * stepW;
+  // ── Layout constants ────────────────────────────────────────────────────
+  const W      = 1000;   // viewBox width
+  const H      = 160;    // viewBox height
+  const LINE_Y = 88;     // vertical centre of the timeline line
+  const ML     = 36;     // left margin
+  const MR     = 60;     // right margin — room for "2030  ongoing"
+  const trackW = W - ML - MR;
+
+  const currentYear  = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+
+  function xOfYear(year: number): number {
+    const frac = (year - years[0]) / (HORIZON_YEAR - years[0]);
+    return ML + frac * trackW;
   }
 
-  // Map node years onto the timeline x positions
-  // For each milestone year, find the closest timeline slot
-  function xOfYear(year: number) {
-    const span = HORIZON_YEAR - years[0];
-    const frac = (year - years[0]) / span;
-    return margin + frac * (nowX - margin - 20);
-  }
+  const currentFrac = (currentYear + currentMonth / 12 - years[0]) / (HORIZON_YEAR - years[0]);
+  const currentX    = ML + currentFrac * trackW;
+  const horizonX    = ML + trackW; // exact x of 2030
 
-  // Deduplicate to one node per year (take highest weight)
+  // Deduplicate to one node per year (highest weight wins)
   const byYear = new Map<number, JourneyNode>();
   for (const node of nodes) {
     const year = parseInt(node.start);
@@ -126,24 +118,16 @@ export function HomePipeline({ nodes }: Props) {
     if (!existing || node.weight > existing.weight) byYear.set(year, node);
   }
 
-  const hasLiveNode = nodes.some((n) => !n.end);
-  const nowLabel = getNowLabel();
-  const liveSlug = getLiveProjectSlug(nodes);
-  const liveName = getLiveProjectName(nodes);
-  const liveHref = `/projects/${liveSlug}`;
-
-  // Current year fraction along the timeline for the "now" dot position
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth(); // 0-indexed
-  const currentFrac = (currentYear + currentMonth / 12 - years[0]) / (HORIZON_YEAR - years[0]);
-  const currentX = margin + currentFrac * (nowX - margin - 20);
+  const nowLabel  = getNowLabel();
+  const liveSlug  = getLiveProjectSlug(nodes);
+  const liveName  = getLiveProjectName(nodes);
+  const liveHref  = `/projects/${liveSlug}`;
 
   return (
     <div
       ref={containerRef}
       className="pipeline rounded-sm border border-line bg-panel/60 p-4"
     >
-      {/* SVG is NOT a link — we handle clicks per element */}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full"
@@ -151,68 +135,62 @@ export function HomePipeline({ nodes }: Props) {
         role="img"
         aria-label={`Career pipeline from ${years[0]} to ${HORIZON_YEAR}. Currently at ${nowLabel}.`}
       >
-        {/* ── Base timeline line ───────────────────────────── */}
+
+        {/* ── Full base line (solid) ───────────────────────── */}
         <line
           className="stroke-line"
-          x1={margin}
-          y1={Y}
-          x2={nowX + 14}
-          y2={Y}
+          x1={ML} y1={LINE_Y}
+          x2={horizonX} y2={LINE_Y}
           strokeWidth={1.5}
         />
 
-        {/* ── Dashed future line: now → horizon ───────────── */}
+        {/* ── Dashed overlay: currentX → horizon ──────────── */}
         <line
           className="pedge"
           style={{ "--i": years.length + 1 } as React.CSSProperties}
-          x1={currentX}
-          y1={Y}
-          x2={nowX + 14}
-          y2={Y}
+          x1={currentX} y1={LINE_Y}
+          x2={horizonX} y2={LINE_Y}
           strokeWidth={1}
           stroke="var(--color-line)"
           strokeDasharray="4 4"
           pathLength={1}
-          opacity={0.4}
+          opacity={0.35}
         />
 
-        {/* ── Solid line: start → now ──────────────────────── */}
+        {/* ── Animated solid segments: start → now ────────── */}
         {years.slice(0, -1).map((yr, i) => (
           <line
             key={yr}
             className="pedge stroke-line"
             style={{ "--i": i } as React.CSSProperties}
-            x1={xOfYear(yr)}
-            y1={Y}
-            x2={xOfYear(years[i + 1])}
-            y2={Y}
+            x1={xOfYear(yr)}   y1={LINE_Y}
+            x2={xOfYear(years[i + 1])} y2={LINE_Y}
             strokeWidth={1.5}
             pathLength={1}
           />
         ))}
 
-        {/* ── Year tick marks ──────────────────────────────── */}
+        {/* ── Year tick marks (below the line) ────────────── */}
         {years.map((yr, i) => {
-          const x = xOfYear(yr);
-          const isPast = yr < currentYear;
+          const x        = xOfYear(yr);
+          const isPast   = yr < currentYear;
           const isFuture = yr > currentYear;
+          // Hide the last tick — 2030 is rendered separately with "ongoing"
+          if (yr === HORIZON_YEAR) return null;
           return (
             <g key={yr} className="pnode" style={{ "--i": i } as React.CSSProperties}>
-              <circle
-                cx={x}
-                cy={Y}
-                r={3}
-                fill={isFuture ? "transparent" : "var(--color-ink)"}
+              {/* tick stub */}
+              <line
+                x1={x} y1={LINE_Y} x2={x} y2={LINE_Y + 6}
                 stroke="var(--color-line)"
                 strokeWidth={1}
-                opacity={isFuture ? 0.3 : isPast ? 0.5 : 1}
+                opacity={isFuture ? 0.25 : 0.5}
               />
               <text
-                x={x}
-                y={Y + 22}
+                x={x} y={LINE_Y + 18}
                 textAnchor="middle"
                 className="fill-muted font-mono"
-                style={{ fontSize: 10, opacity: isFuture ? 0.3 : 0.7 }}
+                style={{ fontSize: 10, opacity: isFuture ? 0.25 : isPast ? 0.6 : 0.85 }}
               >
                 {yr}
               </text>
@@ -220,15 +198,40 @@ export function HomePipeline({ nodes }: Props) {
           );
         })}
 
+        {/* ── Horizon: "2030  ongoing" inline at right end ── */}
+        <line
+          x1={horizonX} y1={LINE_Y} x2={horizonX} y2={LINE_Y + 6}
+          stroke="var(--color-line)"
+          strokeWidth={1}
+          opacity={0.2}
+        />
+        <text
+          x={horizonX} y={LINE_Y + 18}
+          textAnchor="middle"
+          className="fill-muted font-mono"
+          style={{ fontSize: 10, opacity: 0.25 }}
+        >
+          {HORIZON_YEAR}
+        </text>
+        <text
+          x={horizonX} y={LINE_Y + 30}
+          textAnchor="middle"
+          className="fill-muted font-mono"
+          style={{ fontSize: 9, opacity: 0.35, fontStyle: "italic" }}
+        >
+          ongoing
+        </text>
+
         {/* ── Journey milestone dots ───────────────────────── */}
         {Array.from(byYear.entries()).map(([yr, node], i) => {
-          const meta = getNodeMeta(node);
-          const x = xOfYear(yr);
-          const isLive = meta.tone === "live";
+          const meta      = getNodeMeta(node);
+          const x         = xOfYear(yr);
+          const isLive    = meta.tone === "live";
           const isFlagship = meta.tone === "flagship";
-          const isEdu = node.kind === "education";
+          const isEdu     = node.kind === "education";
           const isProject = node.kind === "project";
-          const nodeLabel = isEdu ? "Completed" : isProject ? "Deployed" : null;
+          const tag       = isEdu ? "Completed" : isProject ? "Deployed" : null;
+
           return (
             <g
               key={`node-${yr}`}
@@ -236,30 +239,39 @@ export function HomePipeline({ nodes }: Props) {
               style={{ "--i": i + years.length, cursor: "pointer" } as React.CSSProperties}
               onClick={() => router.push("/journey")}
             >
+              {/* pulse ring for live nodes */}
               {isLive && (
-                <circle cx={x} cy={Y} r={meta.r + 4}
-                  className="fill-none stroke-live" strokeWidth={1} opacity={0.4} />
+                <circle cx={x} cy={LINE_Y} r={meta.r + 5}
+                  className="fill-none stroke-live" strokeWidth={1} opacity={0.35} />
               )}
+
+              {/* main dot */}
               <circle
-                cx={x} cy={Y} r={meta.r}
-                fill={isFlagship ? "var(--color-signal)" : isLive ? "var(--color-live)" : "var(--color-ink)"}
+                cx={x} cy={LINE_Y} r={meta.r}
+                fill={
+                  isFlagship ? "var(--color-signal)"
+                  : isLive   ? "var(--color-live)"
+                  :            "var(--color-ink)"
+                }
               />
-              {nodeLabel && (
+
+              {/* tag label — rendered in the UPPER zone, well above the line */}
+              {tag && (
                 <text
                   x={x}
-                  y={Y - meta.r - 6}
+                  y={LINE_Y - meta.r - 14}
                   textAnchor="middle"
                   className="fill-muted font-mono"
-                  style={{ fontSize: 8, opacity: 0.65 }}
+                  style={{ fontSize: 9, opacity: 0.6, letterSpacing: "0.02em" }}
                 >
-                  {nodeLabel}
+                  {tag}
                 </text>
               )}
             </g>
           );
         })}
 
-        {/* ── NOW dot — clickable, shows tooltip ──────────── */}
+        {/* ── NOW dot — clickable, tooltip on hover ────────── */}
         <g
           className="pnode"
           style={{ "--i": years.length, cursor: "pointer" } as React.CSSProperties}
@@ -269,46 +281,40 @@ export function HomePipeline({ nodes }: Props) {
           role="button"
           aria-label={`Most recent project: ${liveName}. Click to view.`}
         >
-          {/* Outer ring */}
-          <circle cx={currentX} cy={Y} r={14}
+          {/* outer pulse ring */}
+          <circle cx={currentX} cy={LINE_Y} r={15}
             fill="transparent"
-            className="stroke-live" strokeWidth={1} opacity={0.25}
+            className="stroke-live" strokeWidth={1} opacity={0.2}
           />
-          {/* Inner ring */}
-          <circle cx={currentX} cy={Y} r={9}
+          {/* inner ring */}
+          <circle cx={currentX} cy={LINE_Y} r={9}
             fill="transparent"
-            className="stroke-live" strokeWidth={1} opacity={0.5}
+            className="stroke-live" strokeWidth={1} opacity={0.45}
           />
-          {/* Solid dot */}
-          <circle cx={currentX} cy={Y} r={5} className="fill-live" />
+          {/* solid centre */}
+          <circle cx={currentX} cy={LINE_Y} r={5} className="fill-live" />
 
-          {/* Month/year label below */}
+          {/* "now" label — below the line, same row as year ticks */}
           <text
-            x={currentX} y={Y + 22}
+            x={currentX} y={LINE_Y + 18}
             textAnchor="middle"
             className="fill-live font-mono"
-            style={{ fontSize: 10, fontWeight: 500 }}
+            style={{ fontSize: 10, fontWeight: 600 }}
           >
             {nowLabel}
           </text>
 
-          {/* Tooltip on hover */}
+          {/* Hover tooltip — floats above the dot */}
           {hovering && (
             <g>
-              {/* Tooltip box */}
               <rect
-                x={currentX - 90}
-                y={Y - 46}
-                width={180}
-                height={26}
+                x={currentX - 84} y={LINE_Y - 52}
+                width={168} height={24}
                 rx={3}
-                fill="var(--color-ink)"
-                opacity={0.92}
+                fill="var(--color-ink)" opacity={0.9}
               />
-              {/* Project name */}
               <text
-                x={currentX}
-                y={Y - 28}
+                x={currentX} y={LINE_Y - 35}
                 textAnchor="middle"
                 fill="var(--color-paper)"
                 style={{ fontSize: 11, fontFamily: "var(--font-mono)" }}
@@ -319,32 +325,11 @@ export function HomePipeline({ nodes }: Props) {
           )}
         </g>
 
-        {/* ── 2030 horizon label ───────────────────────────── */}
-        <text
-          x={nowX + 14}
-          y={Y + 22}
-          textAnchor="middle"
-          className="fill-muted font-mono"
-          style={{ fontSize: 10, opacity: 0.25 }}
-        >
-          {HORIZON_YEAR}
-        </text>
-
-        {/* ── "ongoing" end label ──────────────────────────── */}
-        <text
-          x={nowX + 14}
-          y={Y + 35}
-          textAnchor="middle"
-          className="fill-muted font-mono"
-          style={{ fontSize: 9, opacity: 0.4, fontStyle: "italic" }}
-        >
-          ongoing
-        </text>
       </svg>
 
-      {/* Journey link */}
-      <div className="mt-1 flex items-center justify-between">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-muted">
+      {/* ── Legend + full-journey link ───────────────────────── */}
+      <div className="mt-2 flex items-center justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-[1px] bg-signal" aria-hidden />
             flagship
