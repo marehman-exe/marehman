@@ -8,18 +8,27 @@ interface Props {
   nodes: JourneyNode[];
 }
 
-// Build timeline data from journey nodes
+// Pick a representative set of milestone years to display on the pipeline.
+// We want chronological spread, not every node year.
 function buildTimelinePoints(nodes: JourneyNode[]) {
-  // Use unique years from nodes, sorted ascending
-  const years = Array.from(
+  // Collect unique years, sorted ascending
+  const allYears = Array.from(
     new Set(nodes.map((n) => parseInt(n.start)))
   ).sort((a, b) => a - b);
 
-  // Add current year if not there and last node has no end
-  const currentYear = new Date().getFullYear();
-  if (!years.includes(currentYear)) years.push(currentYear);
+  // Always include first and last; thin the middle to at most ~7 points
+  if (allYears.length <= 7) return allYears;
 
-  return years;
+  const first = allYears[0];
+  const last = allYears[allYears.length - 1];
+  const middle = allYears.slice(1, -1);
+
+  // Pick evenly spaced points from the middle
+  const targetMiddle = 5;
+  const step = Math.ceil(middle.length / targetMiddle);
+  const picked = middle.filter((_, i) => i % step === 0);
+
+  return [first, ...picked, last];
 }
 
 function getNodeMeta(node: JourneyNode): { tone: "flagship" | "live" | "default"; r: number } {
@@ -75,6 +84,9 @@ export function HomePipeline({ nodes }: Props) {
     if (!existing || node.weight > existing.weight) byYear.set(year, node);
   }
 
+  // Check if any node is still active (no end date)
+  const hasLiveNode = nodes.some((n) => !n.end);
+
   return (
     <div
       ref={containerRef}
@@ -107,6 +119,22 @@ export function HomePipeline({ nodes }: Props) {
             />
           ))}
 
+          {/* Trailing line from last year to "now" marker */}
+          {hasLiveNode && (
+            <line
+              className="pedge stroke-live"
+              style={{ "--i": years.length } as React.CSSProperties}
+              x1={xOf(years[years.length - 1])}
+              y1={Y}
+              x2={W - 8}
+              y2={Y}
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              pathLength={1}
+              opacity={0.5}
+            />
+          )}
+
           {/* Nodes */}
           {years.map((yr, i) => {
             const node = byYear.get(yr);
@@ -114,13 +142,12 @@ export function HomePipeline({ nodes }: Props) {
             const x = xOf(yr);
             const isLive = meta.tone === "live";
             const isFlagship = meta.tone === "flagship";
-            const isCurrent = yr === new Date().getFullYear();
 
             return (
               <g
                 key={yr}
                 className="pnode"
-                style={{ "--i": i, opacity: isCurrent || !node ? 0.3 : 1 } as React.CSSProperties}
+                style={{ "--i": i } as React.CSSProperties}
               >
                 {isLive && (
                   <circle
@@ -129,7 +156,7 @@ export function HomePipeline({ nodes }: Props) {
                     r={meta.r + 4}
                     className="fill-none stroke-live"
                     strokeWidth={1}
-                    opacity={0.6}
+                    opacity={0.5}
                   />
                 )}
                 <circle
@@ -158,6 +185,38 @@ export function HomePipeline({ nodes }: Props) {
               </g>
             );
           })}
+
+          {/* "now" live indicator at far right */}
+          {hasLiveNode && (
+            <g
+              className="pnode"
+              style={{ "--i": years.length } as React.CSSProperties}
+            >
+              <circle
+                cx={W - 8}
+                cy={Y}
+                r={10}
+                className="fill-none stroke-live"
+                strokeWidth={1}
+                opacity={0.4}
+              />
+              <circle
+                cx={W - 8}
+                cy={Y}
+                r={5}
+                className="fill-live"
+              />
+              <text
+                x={W - 8}
+                y={Y + 24}
+                textAnchor="middle"
+                className="fill-live font-mono"
+                style={{ fontSize: 10 }}
+              >
+                now
+              </text>
+            </g>
+          )}
         </svg>
       </Link>
 
