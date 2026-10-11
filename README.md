@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# marehman.me — Portfolio
 
-## Getting Started
+Personal portfolio built with Next.js, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework** — Next.js 16 (App Router)
+- **Language** — TypeScript
+- **Styling** — Tailwind CSS v4
+- **Fonts** — Space Grotesk, Instrument Sans, IBM Plex Mono
+- **Deployment** — Vercel
+
+## Routes
+
+| Route | Page |
+|---|---|
+| `/` | Home — hero, profile switcher, journey map, projects |
+| `/journey` | Career and project timeline |
+| `/projects` | Full project catalogue |
+| `/projects/[slug]` | Individual case study |
+| `/about` | Background, skills, experience, education |
+| `/cv` | CV with print / PDF support |
+
+## Project structure
+
+```
+src/
+  app/                  # Next.js App Router pages
+    page.tsx            # Homepage
+    journey/page.tsx
+    projects/page.tsx
+    projects/[slug]/page.tsx
+    about/page.tsx
+    cv/page.tsx
+    globals.css         # Design tokens, base styles
+    layout.tsx          # Root layout, fonts, metadata
+  components/           # Shared UI components
+  context/              # RoleContext (profile switcher state)
+  data/                 # All content — projects, journey, skills, profile
+    profile.ts
+    projects.ts
+    journey.ts
+    skills.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Content
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All content lives in `src/data/`. To update projects, add an entry to `projects.ts`. To update the timeline, edit `journey.ts`. No CMS required.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deployed on Vercel. Push to `main` triggers a production deploy automatically.

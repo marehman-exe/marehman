@@ -1,69 +1,145 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import { profile } from "@/data/profile";
+import { SectionLabel } from "@/components/SectionLabel";
+import { ViewFilter } from "@/components/ViewFilter";
+import { HomePipeline } from "@/components/HomePipeline";
+import { FlagshipProjects } from "@/components/FlagshipProjects";
+import { HeroSummary } from "@/components/HeroSummary";
+import { journey } from "@/data/journey";
+import { secondaryProjects } from "@/data/projects";
+import Link from "next/link";
 
-export default function Home() {
+const baseUrl = "https://marehman.me";
+
+export const metadata: Metadata = {
+  title: `${profile.name} — ${profile.title}`,
+  description: profile.tagline,
+  alternates: { canonical: baseUrl },
+  openGraph: {
+    url: baseUrl,
+    title: `${profile.name} — ${profile.title}`,
+    description: profile.tagline,
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  url: baseUrl,
+  jobTitle: profile.title,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: profile.location,
+  },
+  email: `mailto:${profile.links.email}`,
+  sameAs: [profile.links.github, profile.links.linkedin],
+};
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="mx-auto max-w-content px-6 py-12">
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* ── 01 · Profile ─────────────────────────────────────────────── */}
+      <section aria-labelledby="hero-heading">
+        {/* Metadata eyebrow */}
+        <div className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted">
+          <span className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-live" aria-hidden />
+            building with ai &amp; python
+          </span>
+          <span aria-hidden className="text-line">|</span>
+          <span>{profile.location}</span>
+          <span aria-hidden className="text-line">|</span>
+          <span>01 · profile</span>
+        </div>
+
+        {/* Headline */}
+        <h1
+          id="hero-heading"
+          className="mt-5 max-w-4xl font-display text-4xl font-bold leading-[1.06] tracking-tight text-ink sm:text-5xl"
+        >
+          {profile.tagline}
+        </h1>
+
+        {/* Sub-headline — updates with role selection */}
+        <HeroSummary />
+
+        {/* View-as filter */}
+        <ViewFilter />
+      </section>
+
+      {/* ── 02 · System Map ──────────────────────────────────────────── */}
+      <section className="mt-16" aria-labelledby="section-02">
+        <SectionLabel
+          number="02"
+          label="system map"
+          href="/journey"
+          linkLabel="full journey"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <div className="mt-4">
+          <HomePipeline nodes={journey} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </section>
+
+      {/* ── 03 · Flagship Systems ────────────────────────────────────── */}
+      <section className="mt-16" aria-labelledby="section-03">
+        <SectionLabel
+          number="03"
+          label="flagship systems"
+          href="/projects"
+          linkLabel="all projects"
+        />
+        <FlagshipProjects />
+      </section>
+
+      {/* ── 04 · Selected Experiments ────────────────────────────────── */}
+      {secondaryProjects.length > 0 && (
+        <section className="mt-16" aria-labelledby="section-04">
+          <SectionLabel
+            number="04"
+            label="selected experiments"
+            href="/projects"
+            linkLabel="all projects"
+          />
+          <ul className="mt-5 flex flex-col divide-y divide-line">
+            {secondaryProjects.map((p) => (
+              <li key={p.id} className="py-4">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <span className="font-display text-sm font-medium text-ink">{p.name}</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
+                    {p.status} · {p.period}
+                  </span>
+                </div>
+                <p className="mt-1 max-w-2xl font-body text-sm leading-relaxed text-muted">
+                  {p.oneLiner}
+                </p>
+                <ul className="mt-2 flex flex-wrap gap-1.5">
+                  {p.stack.map((tech) => (
+                    <li
+                      key={tech}
+                      className="rounded-sm border border-line px-2 py-0.5 font-mono text-[11px] text-muted"
+                    >
+                      {tech}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href="/projects"
+            className="mt-4 inline-flex items-center font-mono text-xs uppercase tracking-[0.08em] text-signal hover:underline"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            explore all projects →
+          </Link>
+        </section>
+      )}
+    </main>
   );
 }
