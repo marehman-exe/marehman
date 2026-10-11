@@ -31,8 +31,8 @@ const baseUrl = "https://marehman.me";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: `${profile.name} — ${profile.title}`,
-    template: `%s — ${profile.name}`,
+    default: "marehman",
+    template: `%s — marehman`,
   },
   description: `${profile.title}. ${profile.tagline}`,
   authors: [{ name: profile.name, url: baseUrl }],

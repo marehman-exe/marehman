@@ -12,7 +12,7 @@ import Link from "next/link";
 const baseUrl = "https://marehman.me";
 
 export const metadata: Metadata = {
-  title: `${profile.name} — ${profile.title}`,
+  title: "marehman",
   description: profile.tagline,
   alternates: { canonical: baseUrl },
   openGraph: {
