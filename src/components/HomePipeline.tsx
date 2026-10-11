@@ -198,7 +198,7 @@ export function HomePipeline({ nodes }: Props) {
           );
         })}
 
-        {/* ── Horizon: "2030  ongoing" inline at right end ── */}
+        {/* ── Horizon tick ─────────────────────────────────── */}
         <line
           x1={horizonX} y1={LINE_Y} x2={horizonX} y2={LINE_Y + 6}
           stroke="var(--color-line)"
@@ -213,25 +213,13 @@ export function HomePipeline({ nodes }: Props) {
         >
           {HORIZON_YEAR}
         </text>
-        <text
-          x={horizonX} y={LINE_Y + 30}
-          textAnchor="middle"
-          className="fill-muted font-mono"
-          style={{ fontSize: 9, opacity: 0.35, fontStyle: "italic" }}
-        >
-          ongoing
-        </text>
 
         {/* ── Journey milestone dots ───────────────────────── */}
         {Array.from(byYear.entries()).map(([yr, node], i) => {
-          const meta      = getNodeMeta(node);
-          const x         = xOfYear(yr);
-          const isLive    = meta.tone === "live";
+          const meta       = getNodeMeta(node);
+          const x          = xOfYear(yr);
+          const isLive     = meta.tone === "live";
           const isFlagship = meta.tone === "flagship";
-          const isEdu     = node.kind === "education";
-          const isProject = node.kind === "project";
-          const tag       = isEdu ? "Completed" : isProject ? "Deployed" : null;
-
           return (
             <g
               key={`node-${yr}`}
@@ -239,13 +227,10 @@ export function HomePipeline({ nodes }: Props) {
               style={{ "--i": i + years.length, cursor: "pointer" } as React.CSSProperties}
               onClick={() => router.push("/journey")}
             >
-              {/* pulse ring for live nodes */}
               {isLive && (
                 <circle cx={x} cy={LINE_Y} r={meta.r + 5}
                   className="fill-none stroke-live" strokeWidth={1} opacity={0.35} />
               )}
-
-              {/* main dot */}
               <circle
                 cx={x} cy={LINE_Y} r={meta.r}
                 fill={
@@ -254,19 +239,6 @@ export function HomePipeline({ nodes }: Props) {
                   :            "var(--color-ink)"
                 }
               />
-
-              {/* tag label — rendered in the UPPER zone, well above the line */}
-              {tag && (
-                <text
-                  x={x}
-                  y={LINE_Y - meta.r - 14}
-                  textAnchor="middle"
-                  className="fill-muted font-mono"
-                  style={{ fontSize: 9, opacity: 0.6, letterSpacing: "0.02em" }}
-                >
-                  {tag}
-                </text>
-              )}
             </g>
           );
         })}
