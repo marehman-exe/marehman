@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { projects } from "@/data/projects";
 
-const baseUrl = "https://marehman.me";
+const baseUrl = "https://marehmandev.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const caseStudySlugs = projects

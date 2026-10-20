@@ -87,10 +87,11 @@ export const projects: Project[] = [
         "Silent JWT refresh — multiple concurrent 401s need to queue behind a single refresh, not each trigger one.",
       ],
       results: [
-        "Tenant isolation tested across multiple firms with separate corpora — no cross-tenant results observed.",
-        "Hybrid search returns relevant results for both exact-term and semantic queries.",
-        "Zero external embedding API cost.",
-        "In active development.",
+        "Tenant isolation verified across multiple firms with separate corpora — firm_id enforced at the query layer, no cross-tenant results observed.",
+        "Hybrid search (vector + BM25 via RRF) returns relevant results for exact-term and semantic queries.",
+        "Zero external embedding API cost — BAAI/bge-small-en-v1.5 runs locally, CPU-only.",
+        "JWT auth with revocable refresh tokens and RBAC enforced on every endpoint — security enforced server-side, not by the frontend.",
+        "In active development — retrieval pipeline and auth complete; frontend role-switching in progress.",
       ],
       lessons: [
         "Build the isolation model before adding retrieval. Retrofitting it is harder.",
@@ -252,7 +253,7 @@ export const projects: Project[] = [
     weight: 2,
     roles: ["ai", "projects"],
     stack: ["Python", "Scikit-learn", "XGBoost", "Pandas", "Matplotlib"],
-    githubUrl: "https://github.com/marehman-exe/Wase---User-Churn-Prediction",
+    githubUrl: "https://github.com/marehman-exe/Waze---User-Churn-Prediction",
     caseStudy: {
       problem:
         "Predict which users are likely to stop using Waze so retention efforts can be targeted before they leave.",

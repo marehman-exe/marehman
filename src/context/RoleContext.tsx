@@ -29,6 +29,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   const [role, setRoleState] = useState<RoleKey>(DEFAULT_ROLE);
 
   useEffect(() => {
+    // Reading from window.location after hydration — intentional, not a cascade risk
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRoleState(readRoleFromUrl());
     const onPop = () => setRoleState(readRoleFromUrl());
     window.addEventListener("popstate", onPop);
@@ -38,7 +40,11 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   const setRole = useCallback((r: RoleKey) => {
     setRoleState(r);
     const params = new URLSearchParams(window.location.search);
-    r === DEFAULT_ROLE ? params.delete("role") : params.set("role", r);
+    if (r === DEFAULT_ROLE) {
+      params.delete("role");
+    } else {
+      params.set("role", r);
+    }
     const qs = params.toString();
     window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
   }, []);

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { projects } from "@/data/projects";
-import { profile } from "@/data/profile";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -61,6 +60,32 @@ export default async function CaseStudyPage({ params }: Props) {
             </li>
           ))}
         </ul>
+
+        {/* External links */}
+        {(project.githubUrl || project.demoUrl) && (
+          <div className="mt-4 flex flex-wrap gap-4">
+            {project.githubUrl && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-xs text-signal hover:underline"
+              >
+                GitHub →
+              </a>
+            )}
+            {project.demoUrl && (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-xs text-signal hover:underline"
+              >
+                Live demo →
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Case study body */}

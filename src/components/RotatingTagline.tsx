@@ -10,6 +10,8 @@ export function RotatingTagline() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
+    // Respect reduced-motion preference — keep the first tagline static
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const interval = setInterval(() => {
       // fade out
       setVisible(false);
@@ -28,6 +30,7 @@ export function RotatingTagline() {
       style={{
         opacity: visible ? 1 : 0,
         transition: "opacity 0.35s ease",
+        // motion is suppressed in CSS via prefers-reduced-motion; JS guard above stops rotation
       }}
     >
       {lines[index]}

@@ -1,9 +1,8 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import type { JourneyNode, JourneyRole } from "@/data/journey";
+import type { JourneyNode } from "@/data/journey";
 import { ROLES } from "@/data/profile";
-import type { RoleKey } from "@/data/profile";
 
 interface Props {
   nodes: JourneyNode[];

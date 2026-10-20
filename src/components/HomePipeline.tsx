@@ -4,6 +4,8 @@ import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { JourneyNode } from "@/data/journey";
+import { profile } from "@/data/profile";
+import { projects } from "@/data/projects";
 
 interface Props {
   nodes: JourneyNode[];
@@ -31,28 +33,23 @@ function getNodeMeta(node: JourneyNode): { tone: "flagship" | "live" | "default"
   return { tone: "default", r: node.weight === 2 ? 5 : 3.5 };
 }
 
-function getMostRecentLiveProject(nodes: JourneyNode[]) {
-  return nodes
-    .filter((n) => !n.end && n.links?.some((l) => l.url.includes("/projects/")))
-    .sort((a, b) => b.start.localeCompare(a.start))[0] ?? null;
-}
-
-function getLiveProjectSlug(nodes: JourneyNode[]): string {
-  const node = getMostRecentLiveProject(nodes);
-  if (node?.links) {
-    const link = node.links.find((l) => l.url.includes("/projects/"));
-    if (link) {
-      const parts = link.url.split("/projects/");
-      if (parts[1]) return parts[1];
-    }
-  }
-  return "lexbase-legal-rag";
-}
-
-function getLiveProjectName(nodes: JourneyNode[]): string {
-  const node = getMostRecentLiveProject(nodes);
-  if (node) return node.title;
-  return "LexBase";
+/**
+ * Returns the slug and display name of the featured "now building" project.
+ * Source of truth is profile.featuredProjectSlug — an explicit field that
+ * avoids fragile URL-substring detection through journey-node links.
+ * Falls back gracefully if the slug doesn't match any known project.
+ */
+function getFeaturedProject(): { slug: string; name: string } {
+  const slug = profile.featuredProjectSlug;
+  const project = projects.find((p) => p.slug === slug);
+  if (project) return { slug, name: project.name };
+  // Fallback: first in-progress flagship, or first flagship
+  const fallback =
+    projects.find((p) => p.weight === 3 && p.status === "in-progress") ??
+    projects.find((p) => p.weight === 3);
+  return fallback
+    ? { slug: fallback.slug, name: fallback.name }
+    : { slug: "lexbase-legal-rag", name: "LexBase" };
 }
 
 export function HomePipeline({ nodes }: Props) {
@@ -116,8 +113,7 @@ export function HomePipeline({ nodes }: Props) {
   }
 
   const nowLabel = getNowLabel();
-  const liveSlug = getLiveProjectSlug(nodes);
-  const liveName = getLiveProjectName(nodes);
+  const { slug: liveSlug, name: liveName } = getFeaturedProject();
   const liveHref = `/projects/${liveSlug}`;
 
   // Years to show a label below (every 2 years to avoid crowding)
@@ -164,7 +160,7 @@ export function HomePipeline({ nodes }: Props) {
         />
 
         {/* ── Every-year dots + year labels + hover tooltips ────── */}
-        {allYears.map((yr, i) => {
+        {allYears.map((yr) => {
           const x         = xOfYear(yr);
           const isFuture  = yr > currentYear;
           const isHovered = hoveredYear === yr;
@@ -252,7 +248,7 @@ export function HomePipeline({ nodes }: Props) {
         </text>
 
         {/* ── Milestone dots (sized by weight, rendered on top) ─── */}
-        {Array.from(byYear.entries()).map(([yr, node], i) => {
+        {Array.from(byYear.entries()).map(([yr, node], nodeIdx) => {
           const meta       = getNodeMeta(node);
           const x          = xOfYear(yr);
           const isLive     = meta.tone === "live";
@@ -261,7 +257,7 @@ export function HomePipeline({ nodes }: Props) {
             <g
               key={`node-${yr}`}
               className="pnode"
-              style={{ "--i": i + allYears.length, cursor: "pointer", pointerEvents: "none" } as React.CSSProperties}
+              style={{ "--i": nodeIdx + allYears.length, cursor: "pointer", pointerEvents: "none" } as React.CSSProperties}
             >
               {isLive && (
                 <circle cx={x} cy={LINE_Y} r={meta.r + 5}

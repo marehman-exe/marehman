@@ -10,16 +10,17 @@ import { journey } from "@/data/journey";
 import { secondaryProjects } from "@/data/projects";
 import Link from "next/link";
 
-const baseUrl = "https://marehman.me";
+const baseUrl = "https://marehmandev.vercel.app";
 
 export const metadata: Metadata = {
   title: "marehman",
-  description: profile.tagline,
+  description: `${profile.name} — ${profile.title}. ${profile.tagline}`,
   alternates: { canonical: baseUrl },
   openGraph: {
     url: baseUrl,
     title: `${profile.name} — ${profile.title}`,
-    description: profile.tagline,
+    description: `${profile.name} — ${profile.title}. ${profile.tagline}`,
+    images: [{ url: `/og.png`, width: 1200, height: 630, alt: `${profile.name} — ${profile.title}` }],
   },
 };
 
@@ -29,9 +30,12 @@ const jsonLd = {
   name: profile.name,
   url: baseUrl,
   jobTitle: profile.title,
+  description: profile.tagline,
   address: {
     "@type": "PostalAddress",
-    addressLocality: profile.location,
+    addressLocality: "Faisalabad",
+    addressRegion: "Punjab",
+    addressCountry: "PK",
   },
   email: `mailto:${profile.links.email}`,
   sameAs: [profile.links.github, profile.links.linkedin],

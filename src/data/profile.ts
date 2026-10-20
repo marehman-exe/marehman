@@ -2,6 +2,8 @@ export const profile = {
   name: "Muhammad Abdur Rehman",
   initials: "MAR",
   title: "AI Engineer",
+  /** Slug of the project shown as "now building" on the homepage pipeline */
+  featuredProjectSlug: "lexbase-legal-rag",
   titlesByRole: {
     ai: "AI Engineer",
     backend: "Python Developer",
