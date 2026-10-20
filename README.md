@@ -1,6 +1,8 @@
-# marehman.me — Portfolio
+# marehman — Portfolio
 
-Personal portfolio built with Next.js, TypeScript, and Tailwind CSS.
+Personal portfolio of **Muhammad Abdur Rehman** — AI Engineer, Python developer.
+
+🌐 **Live:** [https://marehmandev.vercel.app](https://marehmandev.vercel.app)
 
 ## Stack
 
@@ -47,7 +49,7 @@ src/
 
 ```bash
 npm install
-npm run dev
+npm run dev     # uses --webpack flag (required on Windows with WASM bindings)
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -64,4 +66,4 @@ All content lives in `src/data/`. To update projects, add an entry to `projects.
 
 ## Deployment
 
-Deployed on Vercel. Push to `main` triggers a production deploy automatically.
+Deployed on Vercel at [https://marehmandev.vercel.app](https://marehmandev.vercel.app). Push to `main` triggers a production deploy automatically.
