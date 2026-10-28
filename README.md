@@ -1,201 +1,99 @@
-<h1 align="center">Muhammad Abdur Rehman</h1>
+# Muhammad Abdur Rehman
 
-<h3 align="center">
-AI Engineer | Data & ML Practitioner | RAG & Backend Engineering
-</h3>
-
-<p align="center">
-  <em>
-    Building practical AI systems at the intersection of data, machine learning,
-    intelligent retrieval, and backend engineering.
-  </em>
-</p>
-
-<p align="center">
-  <a href="https://www.linkedin.com/in/marehmandev">
-    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" />
-  </a>
-  <a href="mailto:abdurrehmanm778@gmail.com">
-    <img src="https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white" />
-  </a>
-  <img src="https://img.shields.io/badge/Faisalabad%2C%20Pakistan-2563EB?style=flat-square" />
-</p>
+**AI Engineer · Python · RAG & LLM Applications**  
+Faisalabad, Pakistan · [marehmandev.vercel.app](https://marehmandev.vercel.app) · [linkedin.com/in/marehmandev](https://linkedin.com/in/marehmandev) · [abdurrehmanm778@gmail.com](mailto:abdurrehmanm778@gmail.com)
 
 ---
 
-## 🧠 What I Do
+I build AI applications that turn data into useful answers.
 
-I build AI and data-driven applications with a focus on practical engineering and real-world use cases.
+CS graduate. Working full-time as an AI Engineer (remote). My work sits at the intersection of retrieval, applied machine learning, and backend engineering — most of it is on GitHub.
 
-- **AI Engineering** — RAG systems, LLM applications, grounded generation, and AI workflows
-- **Machine Learning** — predictive modeling, classification, feature engineering, and model evaluation
-- **Backend Engineering** — FastAPI, PostgreSQL, SQLAlchemy, API design, authentication, and data systems
-- **Data & Automation** — Python, SQL, data analysis, and automated pipelines
-
-My current focus is on building **reliable RAG and LLM-powered systems** with strong retrieval, security, and production-oriented architecture.
+Full portfolio, case studies, and CV: **[marehmandev.vercel.app](https://marehmandev.vercel.app)**  
+GitHub profile: **[github.com/marehman-exe](https://github.com/marehman-exe)**
 
 ---
 
-## 🚀 Featured Projects
+## What I work on
 
-### ⚖️ LexBase
-
-**[View Repository →](https://github.com/marehman-exe/Lexbase)**
-
-A production-grade, multi-tenant **Retrieval-Augmented Generation (RAG)** system built for law firms.
-
-- Hybrid semantic + keyword search over private document libraries
-- Local embeddings with `BAAI/bge-small-en-v1.5`
-- PostgreSQL + pgvector with HNSW indexing
-- Reciprocal Rank Fusion for hybrid retrieval
-- Grounded AI answers with citation validation
-- Multi-tenant data isolation using `firm_id`
-- JWT authentication with refresh-token rotation
-- Prompt-injection defenses and upload security
-- React + TypeScript frontend with TanStack Query
-- Pluggable LLM providers including Groq, OpenRouter, and Ollama
-
-Built across **11 engineering milestones**, covering the system from data modeling and retrieval through security, LLM integration, frontend development, and production-oriented architecture.
+**RAG & LLM applications** — hybrid search pipelines, grounded generation, local embeddings, hallucination reduction  
+**Machine learning** — predictive models, classification, feature engineering, model evaluation (precision/recall/F1)  
+**Backend engineering** — FastAPI, PostgreSQL, Docker, JWT auth, RBAC, data pipelines  
+**Agents & orchestration** — LangChain, LangGraph, ReAct, multi-agent systems, human-in-the-loop patterns
 
 ---
 
-### 👁️ SightShield
+## Projects
 
-**[View Repository →](https://github.com/marehman-exe/SightShield)**
+### [LexBase](https://github.com/marehman-exe/Lexbase) — Multi-Tenant Legal RAG System
+`Python` `FastAPI` `PostgreSQL` `pgvector` `LangChain` `React` `TypeScript`
 
-An AI-powered wearable smart belt developed as my **Final Year Project** for visually impaired individuals.
+Multi-tenant RAG system for law firms. Each firm's documents are isolated by `firm_id`. Hybrid search fuses vector cosine (HNSW) and BM25 via Reciprocal Rank Fusion. Answers include numbered source citations. Embeddings run locally on `BAAI/bge-small-en-v1.5` — no external API cost. Four roles: Super Admin, Lawyer, Associate, Paralegal.
 
-- Raspberry Pi-based system
-- Real-time object detection
-- Hardware sensor integration
-- Embedded systems
-- Assistive AI
-
-A project combining **AI, computer vision, hardware, and embedded systems** into a practical assistive technology application.
+→ [Case study on portfolio](https://marehmandev.vercel.app/projects/lexbase-legal-rag)
 
 ---
 
-## 📊 Machine Learning & NLP
+### [SightShield](https://github.com/marehman-exe/SightShield) — Assistive Navigation Belt *(Final Year Project)*
+`Python` `Raspberry Pi` `OpenCV` `Object Detection` `Hardware Sensors`
 
-Applied ML/NLP projects built around:
+AI-powered wearable navigation belt for visually impaired users. Real-time object detection on Raspberry Pi — no cloud dependency. Camera module, ultrasonic sensors, haptic motors, and audio feedback combined in a belt form factor.
 
-**Business Problem → Data Analysis → Feature Engineering → Model Development → Evaluation**
+→ [Case study on portfolio](https://marehmandev.vercel.app/projects/sightshield-navigation-belt)
 
-| Project | Focus | Techniques |
+---
+
+### LangChain Academy — Agent Projects
+`Python` `LangChain` `LangGraph` `Groq` `Tavily` `MCP`
+
+Three capstone projects from LangChain Academy:
+
+- **[Personal Chef Agent](https://github.com/marehman-exe/personal-chef-agent)** — ReAct loop, Tavily web search, InMemorySaver, custom state fields for ingredient memory  
+  → [Case study](https://marehmandev.vercel.app/projects/personal-chef-agent)
+- **[Wedding Planner Agent](https://github.com/marehman-exe/wedding-planner-agent)** — Multi-agent supervisor, Kiwi MCP for live flights, Tavily for venues, SQL on Chinook DB for playlist
+- **[Email Assistant Agent](https://github.com/marehman-exe/email-assistant-agent)** — Dynamic tools, dynamic prompts, and human-in-the-loop approval before any email sends
+
+---
+
+### Machine Learning Projects
+`Python` `Scikit-learn` `XGBoost` `Pandas` `Matplotlib`
+
+| Project | Focus | Records |
 |---|---|---|
-| [Waze User Churn Prediction](https://github.com/marehman-exe/Wase---User-Churn-Prediction) | User churn prediction (~15K records) | Random Forest · XGBoost |
-| [TikTok Claim vs. Opinion](https://github.com/marehman-exe/Tiktok---Claim-and-Opinion-Classification) | Content classification (~19.4K records) | Classification · Train/Validation/Test |
-| [Generous Tip Prediction](https://github.com/marehman-exe/Automatidata---Generous-Tip-Prediction) | NYC taxi tipping behavior (~22.7K records) | Feature Engineering · GridSearchCV |
-| [Arabic Small Language Model](https://github.com/marehman-exe/Google-DeepMind---Train-A-Small-Language-Model) | Character-level Arabic NLP | Tokenization · N-grams · Sequence Modeling |
+| [Waze Churn Prediction](https://github.com/marehman-exe/Waze---User-Churn-Prediction) | Recall-optimized retention model · RF + XGBoost | ~15,000 |
+| [TikTok Claim Classifier](https://github.com/marehman-exe/Tiktok---Claim-and-Opinion-Classification) | Claim vs. opinion content classification | ~19,400 |
+| [Taxi Tip Prediction](https://github.com/marehman-exe/Automatidata---Generous-Tip-Prediction) | Leakage-aware binary target · GridSearchCV | ~22,700 |
+| [Arabic Character NLP](https://github.com/marehman-exe/Google-DeepMind---Train-A-Small-Language-Model) | Unicode normalization · tokenization · n-grams | — |
 
 ---
 
-## 🛠️ Tech Stack
+## Stack
 
-### AI & Machine Learning
-
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
-![Scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)
-![XGBoost](https://img.shields.io/badge/XGBoost-018080?style=flat-square)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat-square&logo=tensorflow&logoColor=white)
-![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white)
-![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white)
-
-### RAG & LLM
-
-![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&logo=langchain&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-000000?style=flat-square)
-![Claude API](https://img.shields.io/badge/Claude%20API-D97757?style=flat-square)
-![OpenRouter](https://img.shields.io/badge/OpenRouter-5B5B5B?style=flat-square)
-![Ollama](https://img.shields.io/badge/Ollama-000000?style=flat-square)
-
-### Backend & Data
-
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-![pgvector](https://img.shields.io/badge/pgvector-4169E1?style=flat-square)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=flat-square)
-![Alembic](https://img.shields.io/badge/Alembic-333333?style=flat-square)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-4479A1?style=flat-square&logo=postgresql&logoColor=white)
-
-### Frontend & Tools
-
-![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
-![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square)
-![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white)
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white)
-![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=flat-square&logo=powerbi&logoColor=black)
-![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-A22846?style=flat-square&logo=raspberrypi&logoColor=white)
+**AI / ML** — Python · LangChain · LangGraph · Scikit-learn · XGBoost · Pandas · NumPy  
+**RAG / LLMs** — pgvector · BAAI/bge · Groq · Claude API · Ollama · Tavily · Hybrid search (RRF)  
+**Backend** — FastAPI · PostgreSQL · Docker · SQL · SQLAlchemy · JWT / RBAC  
+**Frontend** — React · TypeScript · TanStack Query · Tailwind CSS  
+**Tools** — Git · Jupyter · Power BI · Raspberry Pi · VS Code
 
 ---
 
-## 🧠 LexBase — Key Engineering Areas
+## Experience
 
-Building LexBase gave me hands-on experience across the complete RAG stack:
+**Artificial Intelligence Engineer** · Full-time, Remote · Jan 2026 – Present  
+**E-commerce Brand Manager & Data Analyst** · Amtex Limited · May 2025 – Feb 2026  
+**Graphic Designer & Digital Marketing Executive** · KENAFSTUDIO · Aug 2024 – Dec 2025  
+**Amazon Account Manager & Marketing Intern** · SellWised · Apr 2023 – Oct 2023
 
-- **Retrieval:** embeddings, pgvector, HNSW, BM25, hybrid search, and Reciprocal Rank Fusion
-- **Backend:** FastAPI, SQLAlchemy 2.0, PostgreSQL, Alembic, and multi-tenant architecture
-- **Security:** JWT authentication, refresh-token rotation, IDOR prevention, rate limiting, CORS, and secure uploads
-- **LLM Integration:** provider abstraction, citation validation, prompt-injection defense, and grounded responses
-- **Frontend:** React 19, TypeScript, TanStack Query, authentication flows, and role-based navigation
-- **Production Thinking:** evaluating MVP architecture against scalable production alternatives
+Full timeline: [marehmandev.vercel.app/journey](https://marehmandev.vercel.app/journey)
 
 ---
 
-## 📚 Currently Learning
+## Education & Certifications
 
-### LangChain
+**Bachelor of Computer Science** · University of Education, Lahore (Faisalabad Campus) · 2022 – 2026
 
-Currently exploring LangChain for building modern LLM applications, including:
-
-- Retrieval-augmented generation
-- Tool integration
-- Agent workflows
-- Structured LLM pipelines
-- Context-aware AI applications
-
-**Learning:** [LangChain Build Overview](https://docs.langchain.com/build-overview)
+Certifications: Introduction to LangChain · The Nuts and Bolts of Machine Learning · Machine Learning Pipelines with Azure ML Studio · Python Data Analytics · Introduction to Large Language Models · Building with the Claude API
 
 ---
 
-## 🎓 Certifications
-
-- **The Nuts and Bolts of Machine Learning**
-- **Data Science & Analytics**
-- **Python Data Analytics**
-- **Building with the Claude API**
-- **Critical Thinking in the AI Era**
-
----
-
-## 🎯 Current Focus
-
-**RAG Systems · LLM Applications · AI Engineering · Machine Learning · Backend Systems · Intelligent Data Workflows**
-
-I'm particularly interested in building AI systems that are:
-
-**Retrieval-grounded · Secure · Evaluatable · Scalable · Production-oriented**
-
----
-
-## 📫 Let's Connect
-
-<p align="center">
-  <a href="https://www.linkedin.com/in/marehmandev">
-    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" />
-  </a>
-  <a href="mailto:abdurrehmanm778@gmail.com">
-    <img src="https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white" />
-  </a>
-  <a href="https://github.com/marehman-exe">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" />
-  </a>
-</p>
-
-<p align="center">
-  <em>Building practical AI systems, one project at a time.</em>
-</p>
+*Portfolio: [marehmandev.vercel.app](https://marehmandev.vercel.app) · CV: [marehmandev.vercel.app/cv](https://marehmandev.vercel.app/cv)*
