@@ -17,14 +17,14 @@ export const profile = {
     email: "abdurrehmanm778@gmail.com",
   },
   summaryByRole: {
-    ai: "I build RAG systems and LLM applications in Python. Currently working part-time as an AI Engineer (remote). Open to full-time opportunities — willing to relocate.",
-    backend: "Python developer comfortable with FastAPI, SQL, and data pipelines. I learn by building and testing real projects.",
+    ai: "I build RAG systems and LLM applications in Python. Currently working full-time as an AI Engineer (remote). Open to new opportunities — willing to relocate.",
+    backend: "Python developer comfortable with FastAPI, SQL, Docker, and data pipelines. I learn by building and testing real projects.",
     projects: "ML models, RAG systems, and AI agents — built as real projects, not tutorials. Each one is on GitHub.",
   },
   tagline: "I build AI applications that turn data into useful answers.",
   taglines: [
     "I build AI applications that turn data into useful answers.",
-    "CS graduate. Working part-time as an AI Engineer — remote.",
+    "CS graduate. Working full-time as an AI Engineer — remote.",
     "RAG systems, LLM agents, and ML models — built and on GitHub.",
     "From e-commerce analytics to AI engineering.",
     "LexBase: multi-tenant RAG for law firms. In progress.",
@@ -44,7 +44,7 @@ export const profile = {
     "Know why a step fails, not just that it does.",
     "Write down the decisions you made and why.",
   ],
-  availability: "Currently working part-time as an AI Engineer (remote). Open to full-time AI and Python development roles — willing to relocate for the right opportunity.",
+  availability: "Currently working full-time as an AI Engineer (remote). Open to new AI and Python development opportunities — willing to relocate for the right role.",
   startedProfessionally: "Apr 2023",
 } as const;
 

@@ -6,7 +6,7 @@ import { ROLES, type RoleKey } from "@/data/profile";
 import { useRef } from "react";
 
 const ROLE_LABELS: Record<RoleKey, string> = {
-  ai: "AI Engineer (Part-time, Remote)",
+  ai: "AI Engineer (Full-time, Remote)",
   backend: "Python Backend Developer",
   projects: "Project Portfolio",
 };

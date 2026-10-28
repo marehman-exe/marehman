@@ -5,6 +5,8 @@ import { RoleProvider } from "@/context/RoleContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ThemeScript } from "@/components/ThemeScript";
+import { CursorTrail } from "@/components/CursorTrail";
+import { ArcadeModal } from "@/components/ArcadeModal";
 import { profile } from "@/data/profile";
 
 const fontDisplay = Space_Grotesk({
@@ -89,6 +91,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeScript />
       </head>
       <body>
+        <CursorTrail />
+        <ArcadeModal />
         <RoleProvider>
           <div className="flex min-h-screen flex-col">
             <Header />

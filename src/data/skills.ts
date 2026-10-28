@@ -87,7 +87,9 @@ export const skillGroups: SkillGroup[] = [
     skills: [
       { name: "PostgreSQL" },
       { name: "pgvector" },
+      { name: "Supabase" },
       { name: "SQL" },
+      { name: "Docker" },
       { name: "Power BI" },
       { name: "Excel" },
     ],
@@ -122,16 +124,16 @@ export const experience = [
   {
     id: "ai-engineer",
     kind: "role" as const,
-    title: "Artificial Intelligence Engineer (Part-time, Remote)",
+    title: "Artificial Intelligence Engineer (Full-time, Remote)",
     org: undefined as string | undefined,
     start: "2026-01",
     summary:
-      "Building predictive ML models, automated data pipelines, end-to-end AI applications, and hardware-software integrations using Python and SQL.",
+      "Building RAG and LLM applications, predictive ML models, automated data pipelines, and hardware-software integrations using Python, SQL, and vector databases.",
     detail: [
-      "Analyze complex datasets and build predictive ML models to drive actionable business insights.",
-      "Design and maintain automated data processing pipelines covering EDA, cleaning, and feature engineering.",
-      "Develop end-to-end AI applications, automation scripts, and hardware-software integrations.",
-      "Create interactive reporting and data visualizations to communicate findings to stakeholders.",
+      "Build RAG and LLM applications in Python using vector databases (Docker, Supabase) with techniques to reduce hallucinations.",
+      "Develop predictive machine learning models with Python, SQL, and Scikit-learn to turn complex datasets into business insights.",
+      "Design automated data pipelines covering EDA, cleaning, and feature engineering; present findings through clear visualizations and reports.",
+      "Deliver end-to-end AI applications and automation scripts, including Raspberry Pi hardware-software integrations, using version-controlled code.",
     ],
   },
   {
@@ -197,8 +199,10 @@ export const education = [
 ];
 
 export const certifications = [
+  { id: "intro-langchain", title: "Introduction to LangChain by LangChain" },
   { id: "nuts-bolts-ml", title: "The Nuts and Bolts of Machine Learning" },
+  { id: "azure-ml-pipelines", title: "Machine Learning Pipelines with Azure ML Studio" },
   { id: "python-analytics", title: "Python Data Analytics" },
-  { id: "ds-analytics", title: "Data Science & Analytics" },
+  { id: "intro-llm", title: "Introduction to Large Language Models" },
   { id: "claude-api", title: "Building with the Claude API" },
 ];

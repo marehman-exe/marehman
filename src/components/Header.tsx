@@ -14,6 +14,9 @@ const NAV = [
   { href: "/cv", label: "CV" },
 ];
 
+const RESUME_URL =
+  "https://docs.google.com/document/d/1MYjH8kMZqj5bJQ-jWemSxePjGSyEO0bOe-Jg0iDmZgc/edit?tab=t.0";
+
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -65,6 +68,15 @@ export function Header() {
               {label}
             </Link>
           ))}
+          {/* External Google Doc resume — opens in new tab */}
+          <a
+            href={RESUME_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-sm px-2 py-1 font-mono text-xs uppercase tracking-[0.08em] text-muted transition-colors hover:text-ink"
+          >
+            Resume ↗
+          </a>
           <span className="ml-1">
             <ThemeToggle />
           </span>
@@ -111,6 +123,15 @@ export function Header() {
                 {label}
               </Link>
             ))}
+            {/* External Google Doc resume */}
+            <a
+              href={RESUME_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-b border-line py-3 font-mono text-xs uppercase tracking-[0.08em] text-muted transition-colors hover:text-ink"
+            >
+              Resume ↗
+            </a>
           </nav>
         </div>
       )}

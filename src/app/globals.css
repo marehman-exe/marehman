@@ -166,8 +166,35 @@ body {
   outline-offset: 2px;
 }
 
+/* ─── Terminal cursor blink ──────────────────────────────────────────────── */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.animate-blink {
+  animation: cursor-blink 1s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-blink { animation: none; opacity: 1; }
+}
+
+/* ─── Cursor trail dot ───────────────────────────────────────────────────── */
+.cursor-trail-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform, opacity;
+  background-color: var(--color-signal);
+}
+
 /* ─── Print ──────────────────────────────────────────────────────────────── */
 @media print {
   .no-print { display: none !important; }
   body { background: white !important; color: #16191b !important; }
+  .cursor-trail-dot { display: none !important; }
 }
