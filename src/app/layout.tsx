@@ -33,10 +33,19 @@ const baseUrl = "https://marehmandev.vercel.app";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "marehman",
-    template: `%s — marehman`,
+    default: "Muhammad Abdur Rehman | AI Engineer",
+    template: `%s — Muhammad Abdur Rehman`,
   },
   description: `${profile.name} — ${profile.title}. ${profile.tagline}`,
+  icons: {
+    icon: [
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-light.png", media: "(prefers-color-scheme: light)" },
+      { url: "/icons/icon-dark.png",  media: "(prefers-color-scheme: dark)" },
+      { url: "/icons/favicon.ico",    sizes: "any" },
+    ],
+    apple: "/icons/apple-icon.png",
+  },
   authors: [{ name: profile.name, url: baseUrl }],
   creator: profile.name,
   keywords: [
