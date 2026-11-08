@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ThemeScript } from "@/components/ThemeScript";
 import { CursorTrail } from "@/components/CursorTrail";
 import { ArcadeModal } from "@/components/ArcadeModal";
+import { GameMode } from "@/components/game/GameMode";
 import { profile } from "@/data/profile";
 
 const fontDisplay = Space_Grotesk({
@@ -93,6 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <CursorTrail />
         <ArcadeModal />
+        <GameMode />
         <RoleProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
