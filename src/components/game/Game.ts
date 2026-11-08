@@ -4,32 +4,156 @@ import { Platform } from "./entities/Platform";
 import { Collectible } from "./entities/Collectible";
 
 // ---------------------------------------------------------------------------
-// Color palette — resolved once from CSS custom properties at Game creation.
+// Physics constants (must match Player.ts)
+// ---------------------------------------------------------------------------
+const GRAVITY        = 1400;  // px/s²  (matches Player.ts)
+const JUMP_VELOCITY  = 520;   // px/s magnitude
+// Max jump height: v²/(2g) ≈ 96 px.  Use 80 % as the reachable-gap threshold.
+const MAX_JUMP_HEIGHT = (JUMP_VELOCITY * JUMP_VELOCITY) / (2 * GRAVITY); // ~96
+const GAP_THRESHOLD   = MAX_JUMP_HEIGHT * 0.8;                           // ~77
+
+// ---------------------------------------------------------------------------
+// Color palette
 // ---------------------------------------------------------------------------
 interface Palette {
   signal: string;
-  live: string;
-  ink: string;
-  paper: string;
-  muted: string;
-  line: string;
+  live:   string;
+  ink:    string;
+  muted:  string;
+  line:   string;
 }
 
 function resolvePalette(): Palette {
-  const s = getComputedStyle(document.documentElement);
+  const s   = getComputedStyle(document.documentElement);
   const get = (v: string) => s.getPropertyValue(v).trim();
   return {
     signal: get("--color-signal") || "#0a6e68",
     live:   get("--color-live")   || "#16a34a",
     ink:    get("--color-ink")    || "#0f1210",
-    paper:  get("--color-paper")  || "#ffffff",
     muted:  get("--color-muted")  || "#52615d",
     line:   get("--color-line")   || "#dde0dc",
   };
 }
 
 // ---------------------------------------------------------------------------
-// Input snapshot — updated by keydown/keyup handlers in Game.
+// DOM platform extraction
+// ---------------------------------------------------------------------------
+const DOM_SELECTOR =
+  "h1, h2, h3, button, " +
+  "a[role='button'], a[class*='btn'], a[class*='button'], " +
+  "img, [class*='card'], [class*='project'], [class*='panel']";
+
+const MAX_DOM_PLATFORMS  = 40;
+const Y_DEDUP_THRESHOLD  = 30; // px — skip platforms within this gap of another
+
+interface PlatformSpec {
+  x: number;
+  y: number;  // document-space
+  w: number;
+  fromDom: boolean;
+}
+
+/** Returns document-space platform specs derived from visible DOM elements. */
+function buildDomPlatforms(canvasWidth: number): PlatformSpec[] {
+  const specs: PlatformSpec[] = [];
+  const els = document.querySelectorAll<HTMLElement>(DOM_SELECTOR);
+
+  for (const el of Array.from(els)) {
+    if (specs.length >= MAX_DOM_PLATFORMS) break;
+
+    // Skip hidden elements
+    if (!el.offsetParent && el.tagName.toLowerCase() !== "body") continue;
+    const style = getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden") continue;
+    const pos = style.position;
+    if (pos === "fixed" || pos === "sticky") continue;
+
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 60 || rect.height < 20) continue;
+
+    // Clamp platform width to canvas; skip if element is mostly off-screen
+    const x = Math.max(0, rect.left);
+    const w = Math.min(rect.width, canvasWidth - x);
+    if (w < 60) continue;
+
+    const y = rect.top + window.scrollY; // document-space top edge
+
+    // Y-dedup: skip if a platform already exists within Y_DEDUP_THRESHOLD
+    const duplicate = specs.some((s) => Math.abs(s.y - y) < Y_DEDUP_THRESHOLD);
+    if (duplicate) continue;
+
+    specs.push({ x, y, w, fromDom: true });
+  }
+
+  return specs;
+}
+
+/** Auto-insert stepping platforms in gaps > GAP_THRESHOLD between sorted specs. */
+function fillGaps(specs: PlatformSpec[], canvasWidth: number): PlatformSpec[] {
+  if (specs.length === 0) return specs;
+
+  // Sort by y ascending (top = small y in document space)
+  const sorted = [...specs].sort((a, b) => a.y - b.y);
+  const result: PlatformSpec[] = [...sorted];
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const upper = sorted[i];
+    const lower = sorted[i + 1];
+    let gap = lower.y - upper.y;
+    let prevY = upper.y;
+
+    while (gap > GAP_THRESHOLD) {
+      const stepY = prevY + GAP_THRESHOLD * 0.9;
+      const stepX = Math.round(((canvasWidth * 0.15) + Math.random() * canvasWidth * 0.6));
+      const stepW = Math.round(80 + Math.random() * 60);
+      const clamped = Math.min(stepX, canvasWidth - stepW);
+      result.push({ x: Math.max(0, clamped), y: stepY, w: stepW, fromDom: false });
+      gap -= GAP_THRESHOLD * 0.9;
+      prevY = stepY;
+    }
+  }
+
+  // Re-sort after insertion
+  return result.sort((a, b) => a.y - b.y);
+}
+
+// ---------------------------------------------------------------------------
+// Collectible placement — one per section, spread across the page
+// ---------------------------------------------------------------------------
+const TOTAL_COLLECTIBLES = 5;
+
+function placeCollectibles(
+  platforms: PlatformSpec[],
+  docHeight: number,
+  palette: Palette,
+): Collectible[] {
+  if (platforms.length === 0) return [];
+
+  // Divide document height into TOTAL_COLLECTIBLES equal bands
+  const bandH = docHeight / TOTAL_COLLECTIBLES;
+  const chosen: PlatformSpec[] = [];
+
+  for (let band = 0; band < TOTAL_COLLECTIBLES; band++) {
+    const lo = band * bandH;
+    const hi = lo + bandH;
+    // Find platforms whose y falls in this band
+    const inBand = platforms.filter((p) => p.y >= lo && p.y < hi);
+    if (inBand.length === 0) {
+      console.warn(`[GameMode] No reachable platform in section ${band + 1}/${TOTAL_COLLECTIBLES}`);
+      continue;
+    }
+    // Pick one — prefer DOM-derived ones first
+    const dom = inBand.filter((p) => p.fromDom);
+    chosen.push(dom.length > 0 ? dom[Math.floor(dom.length / 2)] : inBand[Math.floor(inBand.length / 2)]);
+  }
+
+  return chosen.map(
+    (p) => new Collectible(p.x + p.w / 2 - 7, p.y - 22, palette.live, palette.signal),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Input state
 // ---------------------------------------------------------------------------
 interface InputState {
   left: boolean;
@@ -38,94 +162,82 @@ interface InputState {
 }
 
 // ---------------------------------------------------------------------------
-// Platform layout — expressed as fractions of canvas width/height so they
-// scale when the canvas is resized.
-// ---------------------------------------------------------------------------
-interface PlatformDef {
-  xFrac: number;
-  yFrac: number;
-  wFrac: number;
-}
-
-const PLATFORM_DEFS: PlatformDef[] = [
-  { xFrac: 0.08, yFrac: 0.72, wFrac: 0.18 }, // left low
-  { xFrac: 0.30, yFrac: 0.55, wFrac: 0.16 }, // left mid
-  { xFrac: 0.52, yFrac: 0.40, wFrac: 0.18 }, // center
-  { xFrac: 0.72, yFrac: 0.60, wFrac: 0.14 }, // right mid
-  { xFrac: 0.55, yFrac: 0.75, wFrac: 0.12 }, // right low
-  { xFrac: 0.20, yFrac: 0.35, wFrac: 0.14 }, // left high
-  { xFrac: 0.75, yFrac: 0.30, wFrac: 0.16 }, // right high
-];
-
-// Collectible positions — placed above platforms (index into PLATFORM_DEFS).
-const COLLECTIBLE_ON: number[] = [0, 1, 2, 3, 5]; // 5 gems on 5 platforms
-
-const TOTAL = 5;
-
-// ---------------------------------------------------------------------------
-// Game — owns the loop, entities, input, collision, score, and reset.
-// Composition: Game holds arrays of Entity references and calls
-// update() / draw() polymorphically.
+// Game
 // ---------------------------------------------------------------------------
 export class Game {
   private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private ctx:    CanvasRenderingContext2D;
   private palette: Palette;
 
-  private player!: Player;
-  private platforms: Platform[] = [];
-  private collectibles: Collectible[] = [];
+  private player!:       Player;
+  private platforms:     Platform[] = [];
+  private collectibles:  Collectible[] = [];
+  private platformSpecs: PlatformSpec[] = [];
 
-  /** The full entity list for polymorphic update/draw. */
+  /** Unified polymorphic list for update + draw. */
   private entities: Entity[] = [];
 
-  private input: InputState = { left: false, right: false, jump: false };
-  private jumpConsumed = false; // one-shot jump per keypress
+  private input:        InputState = { left: false, right: false, jump: false };
+  private jumpConsumed  = false;
 
-  private score = 0;
-  private _won = false;
+  private score   = 0;
+  private _won    = false;
+  private _fell   = false;
 
-  private rafId = 0;
+  private rafId    = 0;
   private lastTime = 0;
-  private running = false;
+  private running  = false;
+
+  /** Timestamp of the last scroll we initiated (to distinguish from user scroll). */
+  private lastGameScrollTime = 0;
+  /** Timestamp of the last scroll event we received. */
+  private lastScrollEventTime = 0;
 
   private onScoreChange: (score: number) => void;
-  private onWin: () => void;
+  private onWin:         () => void;
+  private onFell:        () => void;
 
-  // Key handler refs stored so we can remove them on destroy.
-  private boundKeyDown: (e: KeyboardEvent) => void;
-  private boundKeyUp: (e: KeyboardEvent) => void;
-  private boundVisChange: () => void;
+  private boundKeyDown:    (e: KeyboardEvent) => void;
+  private boundKeyUp:      (e: KeyboardEvent) => void;
+  private boundVisChange:  () => void;
+  private boundScroll:     () => void;
+
+  private rebuildTimer: ReturnType<typeof setTimeout> | null = null;
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(
     canvas: HTMLCanvasElement,
     onScoreChange: (score: number) => void,
-    onWin: () => void,
+    onWin:         () => void,
+    onFell:        () => void,
   ) {
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D context unavailable");
-    this.ctx = ctx;
-
+    this.ctx     = ctx;
     this.palette = resolvePalette();
+
     this.onScoreChange = onScoreChange;
-    this.onWin = onWin;
+    this.onWin         = onWin;
+    this.onFell        = onFell;
 
-    this.boundKeyDown = this.handleKeyDown.bind(this);
-    this.boundKeyUp = this.handleKeyUp.bind(this);
+    this.boundKeyDown   = this.handleKeyDown.bind(this);
+    this.boundKeyUp     = this.handleKeyUp.bind(this);
     this.boundVisChange = this.handleVisibilityChange.bind(this);
+    this.boundScroll    = () => { this.lastScrollEventTime = performance.now(); };
 
-    this.buildEntities();
+    this.rebuildPlatforms();
     this.attachListeners();
+    this.scheduleRebuildOnSettle();
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
 
   start(): void {
     if (this.running) return;
-    this.running = true;
+    this.running  = true;
     this.lastTime = performance.now();
-    this.rafId = requestAnimationFrame(this.loop.bind(this));
+    this.rafId    = requestAnimationFrame(this.loop.bind(this));
   }
 
   stop(): void {
@@ -135,132 +247,200 @@ export class Game {
 
   reset(): void {
     this.stop();
-    this.score = 0;
-    this._won = false;
-    this.input = { left: false, right: false, jump: false };
+    this.score  = 0;
+    this._won   = false;
+    this._fell  = false;
+    this.input  = { left: false, right: false, jump: false };
     this.jumpConsumed = false;
-    this.buildEntities();
+    this.rebuildPlatforms();
     this.onScoreChange(0);
     this.start();
   }
 
-  /** Call when the canvas is resized so entities reposition. */
+  /** Respawn player at start WITHOUT resetting score (for "try again" after fall). */
+  respawn(): void {
+    this._fell = false;
+    this.input = { left: false, right: false, jump: false };
+    this.jumpConsumed = false;
+    const spawnY = this.platformSpecs.length > 0
+      ? this.platformSpecs[0].y - this.player.height - 2
+      : 60;
+    this.player.x = this.canvas.width / 2 - 9;
+    this.player.y = spawnY;
+    this.start();
+  }
+
+  /** Called when canvas logical size changes. Re-reads DOM layout. */
   resize(): void {
-    this.buildEntities();
+    this.scheduleRebuild();
   }
 
   destroy(): void {
     this.stop();
     this.detachListeners();
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+    if (this.rebuildTimer !== null) {
+      clearTimeout(this.rebuildTimer);
+      this.rebuildTimer = null;
+    }
   }
 
-  get won(): boolean {
-    return this._won;
-  }
+  get won():   boolean { return this._won;   }
+  get fell():  boolean { return this._fell;  }
+  get total(): number  { return TOTAL_COLLECTIBLES; }
 
-  get total(): number {
-    return TOTAL;
-  }
+  // ── Platform rebuild ──────────────────────────────────────────────────────
 
-  // ── Entity construction ───────────────────────────────────────────────────
+  /**
+   * Build all platforms from DOM + gap-fill, then place collectibles.
+   * NEVER called inside the rAF loop — only from event/observer callbacks.
+   */
+  private rebuildPlatforms(): void {
+    const W = this.canvas.width;   // logical px (already divided by DPR)
+    const palette = this.palette;
 
-  private buildEntities(): void {
-    const { width: W, height: H } = this.canvas;
-    const { signal, live, ink, line, muted } = this.palette;
+    // 1. DOM-derived platforms
+    const domSpecs = buildDomPlatforms(W);
 
-    this.platforms = PLATFORM_DEFS.map(
-      ({ xFrac, yFrac, wFrac }) =>
-        new Platform(
-          Math.round(xFrac * W),
-          Math.round(yFrac * H),
-          Math.round(wFrac * W),
-          line,
-          signal,
-        ),
+    // 2. Ground platform at very top of page (y=0) as a spawn surface, and a
+    //    guaranteed low platform near the very bottom to give the player ground.
+    const docH = document.body.scrollHeight;
+    const extraSpecs: PlatformSpec[] = [
+      { x: 0,               y: 10,         w: W,                    fromDom: false },
+      { x: Math.round(W * 0.1), y: docH - 60, w: Math.round(W * 0.8), fromDom: false },
+    ];
+
+    // 3. Fill gaps
+    const allSpecs = fillGaps([...domSpecs, ...extraSpecs], W);
+    this.platformSpecs = allSpecs;
+
+    // 4. Build Platform entities
+    this.platforms = allSpecs.map(
+      ({ x, y, w }) => new Platform(x, y, w, palette.line, palette.signal),
     );
 
-    this.collectibles = COLLECTIBLE_ON.map((pIdx) => {
-      const p = this.platforms[pIdx];
-      return new Collectible(
-        p.x + p.width / 2 - 7,
-        p.y - 22,
-        live,
-        signal,
+    // 5. Place collectibles
+    this.collectibles = placeCollectibles(allSpecs, docH, palette);
+
+    // 6. Compose entity list (platforms first so player renders on top)
+    this.rebuildEntityList();
+
+    // 7. Spawn player above the topmost platform
+    const spawnSpec = allSpecs[0] ?? { x: W / 2 - 9, y: 30, w: 18 };
+    if (!this.player) {
+      this.player = new Player(
+        spawnSpec.x + spawnSpec.w / 2 - 9,
+        spawnSpec.y - 28,
+        { body: palette.ink, accent: palette.signal },
       );
-    });
+    } else {
+      // Snap player to new surface if its previous ground platform moved
+      this.snapPlayerToGround();
+    }
 
-    // Ground platform spans full width
-    const ground = new Platform(0, H - 4, W, line, signal);
+    this.rebuildEntityList();
+  }
 
-    // Spawn player at center-bottom above ground
-    this.player = new Player(
-      Math.round(W / 2 - 9),
-      H - 4 - 26,
-      { body: ink, accent: signal },
-    );
+  private rebuildEntityList(): void {
+    if (!this.player) return;
+    this.entities = [...this.platforms, ...this.collectibles, this.player];
+  }
 
-    this.entities = [ground, ...this.platforms, ...this.collectibles, this.player];
+  /**
+   * If the player is standing on a platform that has moved during a rebuild,
+   * snap their y to the new surface.
+   */
+  private snapPlayerToGround(): void {
+    if (!this.player.isOnGround()) return;
+    for (const plat of this.platforms) {
+      if (this.player.overlaps(plat)) {
+        const { vy } = this.player.getVelocity();
+        if (vy >= 0) {
+          this.player.land(plat.y);
+          return;
+        }
+      }
+    }
+  }
 
-    // Suppress unused-variable warnings for muted (palette is read once above)
-    void muted;
+  private scheduleRebuild(): void {
+    if (this.rebuildTimer !== null) clearTimeout(this.rebuildTimer);
+    this.rebuildTimer = setTimeout(() => {
+      this.rebuildTimer = null;
+      this.rebuildPlatforms();
+    }, 100);
+  }
+
+  /** Fire a rebuild on `load` and once images/fonts have had time to settle. */
+  private scheduleRebuildOnSettle(): void {
+    // Rebuild after window load (fonts/images may not have been ready at init)
+    const onLoad = () => { this.scheduleRebuild(); };
+    if (document.readyState === "complete") {
+      this.scheduleRebuild();
+    } else {
+      window.addEventListener("load", onLoad, { once: true });
+    }
+
+    // Also trigger after document.fonts if available
+    if (document.fonts && typeof document.fonts.ready !== "undefined") {
+      document.fonts.ready.then(() => this.scheduleRebuild());
+    }
+
+    // ResizeObserver on body to catch layout shifts
+    this.resizeObserver = new ResizeObserver(() => this.scheduleRebuild());
+    this.resizeObserver.observe(document.body);
   }
 
   // ── Main loop ─────────────────────────────────────────────────────────────
 
   private loop(now: number): void {
     if (!this.running) return;
-
-    const dt = Math.min((now - this.lastTime) / 1000, 0.05); // cap at 50 ms
+    const dt = Math.min((now - this.lastTime) / 1000, 0.05);
     this.lastTime = now;
-
     this.update(dt);
     this.render();
-
     this.rafId = requestAnimationFrame(this.loop.bind(this));
   }
 
   private update(dt: number): void {
-    if (this._won) return;
+    if (this._won || this._fell) return;
 
-    // Feed input to player
     this.player.applyInput(this.input.left, this.input.right, this.input.jump);
 
-    // Polymorphic update — every entity updates itself
-    for (const e of this.entities) {
-      e.update(dt);
-    }
+    // Polymorphic update
+    for (const e of this.entities) e.update(dt);
 
-    // Clamp player horizontally
     this.player.clampX(this.canvas.width);
 
-    // Wrap player if they fall below canvas
-    if (this.player.y > this.canvas.height + 40) {
-      this.player.x = this.canvas.width / 2 - 9;
-      this.player.y = 0;
+    // Fall detection: more than 200 px below visible viewport bottom
+    const viewportBottom = window.scrollY + window.innerHeight;
+    if (this.player.y > viewportBottom + 200) {
+      this._fell = true;
+      this.stop();
+      this.onFell();
+      return;
     }
 
-    // Platform collision (AABB top-surface only)
     this.resolvePlatformCollisions();
-
-    // Collectible pickup
     this.resolveCollectibles();
+    this.cameraFollow();
   }
 
+  // ── Collision ─────────────────────────────────────────────────────────────
+
   private resolvePlatformCollisions(): void {
-    // All platforms including the ground (which is also a Platform in entities[0])
-    const surfaces = this.entities.filter((e) => e instanceof Platform);
     const p = this.player;
     const { vy } = p.getVelocity();
 
-    for (const plat of surfaces) {
+    for (const plat of this.platforms) {
       if (!p.overlaps(plat)) continue;
-
-      const prevBottom = p.y + p.height - vy * (1 / 60); // approx prev bottom
-      const platTop = plat.y;
-
-      // Only land when falling and approaching from above
-      if (vy >= 0 && prevBottom <= platTop + 8) {
-        p.land(platTop);
+      // Only land when falling and the player's previous bottom was above the surface
+      const prevBottom = p.y + p.height - vy / 60;
+      if (vy >= 0 && prevBottom <= plat.y + 8) {
+        p.land(plat.y);
       }
     }
   }
@@ -271,12 +451,45 @@ export class Game {
         c.collect();
         this.score += 1;
         this.onScoreChange(this.score);
-        if (this.score >= TOTAL) {
+        if (this.score >= TOTAL_COLLECTIBLES) {
           this._won = true;
           this.onWin();
         }
       }
     }
+  }
+
+  // ── Camera follow ─────────────────────────────────────────────────────────
+
+  /**
+   * Soft camera follow using lerp.  The player's viewport-Y is
+   * player.y - window.scrollY.  We want to keep it in [20 %, 70 %]
+   * of window.innerHeight.  Nudge with scrollBy only when the user
+   * has not manually scrolled in the last 200 ms.
+   */
+  private cameraFollow(): void {
+    const now = performance.now();
+    const userScrolledRecently =
+      this.lastScrollEventTime > this.lastGameScrollTime &&
+      now - this.lastScrollEventTime < 200;
+    if (userScrolledRecently) return;
+
+    const viewportH  = window.innerHeight;
+    const playerViewY = this.player.y - window.scrollY;
+    const zoneTop    = viewportH * 0.20;
+    const zoneBot    = viewportH * 0.70;
+
+    let delta = 0;
+    if (playerViewY < zoneTop) delta = playerViewY - zoneTop;
+    if (playerViewY > zoneBot) delta = playerViewY - zoneBot;
+    if (delta === 0) return;
+
+    // Lerp: scroll proportionally to distance (feels natural, no fixed cap)
+    const nudge = delta * 0.12;
+    if (Math.abs(nudge) < 0.5) return;
+
+    this.lastGameScrollTime = now;
+    window.scrollBy({ top: nudge, behavior: "auto" });
   }
 
   // ── Rendering ─────────────────────────────────────────────────────────────
@@ -285,17 +498,21 @@ export class Game {
     const { ctx, canvas } = this;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Polymorphic draw — every entity draws itself
-    for (const e of this.entities) {
-      e.draw(ctx);
-    }
+    // Translate into document space so entities at absolute y render correctly
+    ctx.save();
+    ctx.translate(0, -window.scrollY);
+
+    // Polymorphic draw
+    for (const e of this.entities) e.draw(ctx);
+
+    ctx.restore();
   }
 
   // ── Input handling ────────────────────────────────────────────────────────
 
   private static isGameKey(key: string): boolean {
-    return ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
-            "w", "a", "s", "d", " "].includes(key);
+    return ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown",
+            "w","a","s","d"," "].includes(key);
   }
 
   private static isFocusedInField(): boolean {
@@ -311,11 +528,7 @@ export class Game {
     if (!Game.isGameKey(e.key)) return;
     if (Game.isFocusedInField()) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-
-    // preventDefault only while game is running and not won
-    if (!this._won) {
-      e.preventDefault();
-    }
+    if (!this._won && !this._fell) e.preventDefault();
 
     switch (e.key) {
       case "ArrowLeft":  case "a": this.input.left  = true;  break;
@@ -323,7 +536,7 @@ export class Game {
       case "ArrowUp":    case "w":
       case " ":
         if (!this.jumpConsumed) {
-          this.input.jump = true;
+          this.input.jump   = true;
           this.jumpConsumed = true;
         }
         break;
@@ -336,7 +549,7 @@ export class Game {
       case "ArrowRight": case "d": this.input.right = false; break;
       case "ArrowUp":    case "w":
       case " ":
-        this.input.jump = false;
+        this.input.jump   = false;
         this.jumpConsumed = false;
         break;
     }
@@ -345,7 +558,7 @@ export class Game {
   private handleVisibilityChange(): void {
     if (document.hidden) {
       this.stop();
-    } else if (!this._won) {
+    } else if (!this._won && !this._fell) {
       this.lastTime = performance.now();
       this.start();
     }
@@ -354,14 +567,16 @@ export class Game {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   private attachListeners(): void {
-    window.addEventListener("keydown", this.boundKeyDown);
-    window.addEventListener("keyup",   this.boundKeyUp);
+    window.addEventListener("keydown",          this.boundKeyDown);
+    window.addEventListener("keyup",            this.boundKeyUp);
+    window.addEventListener("scroll",           this.boundScroll, { passive: true });
     document.addEventListener("visibilitychange", this.boundVisChange);
   }
 
   private detachListeners(): void {
-    window.removeEventListener("keydown", this.boundKeyDown);
-    window.removeEventListener("keyup",   this.boundKeyUp);
+    window.removeEventListener("keydown",          this.boundKeyDown);
+    window.removeEventListener("keyup",            this.boundKeyUp);
+    window.removeEventListener("scroll",           this.boundScroll);
     document.removeEventListener("visibilitychange", this.boundVisChange);
   }
 }
